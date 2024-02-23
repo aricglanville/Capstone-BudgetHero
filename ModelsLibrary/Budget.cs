@@ -1,20 +1,24 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace ModelsLibrary
 {
     public class Budget
     {
-        public Guid BudgetId { get; set; }
+        public int BudgetId { get; set; } 
 
         [Required]
-        public string? BudgetName { get; set; }
+        public string BudgetName { get; set; } = null!;
         
         [Required]
-        public string? BudgetType { get; set; }
+        public string BudgetType { get; set; } = null!;
 
-        public virtual ICollection<User>? Users { get; set; }
+        public ICollection<User>? Users { get; set; }
 
-        public virtual ICollection<BudgetCategoryGroup>? BudgetCategoryGroups { get; set; }
+        public ICollection<BudgetCategoryGroup>? BudgetCategoryGroups { get; set; }
     }
 }

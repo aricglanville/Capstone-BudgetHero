@@ -10,7 +10,6 @@ namespace DesktopApplication.Models
     {
         private readonly IDataStore _dataStore;
         IEnumerable<Transaction?> transactions;
-        private readonly string[] depositItems = new string[3] { "Cash", "Paychecks", "Refunds" };
 
         public ObservableCategoryItem() { }
 
@@ -74,37 +73,38 @@ namespace DesktopApplication.Models
             }
         }
 
+
         public void SetAllocatedAndRemaining()
         {
             /* First set Allocated */
             decimal totalAllocated = 0;
             transactions = _dataStore.Transaction!.GetAll(t => t.BudgetCategoryId == BudgetCategory.BudgetCategoryID);
-
-            if (depositItems.Contains(BudgetCategory.CategoryName))
+            foreach (Transaction? transaction in transactions)
             {
-                foreach (Transaction? transaction in transactions)
-                {
-                    totalAllocated += transaction.DepositAmount;
-                }
-                Allocated = totalAllocated;
+                totalAllocated += transaction.ExpenseAmount;
+            }
+            Allocated = totalAllocated;
+
+            /* Next set Remaining */
+            decimal totalRemaining = _categoryAmount - _allocated;
+            if (totalRemaining <= 0)
+            {
+                totalRemaining = 0.00m;
+            }
+            Remaining = totalRemaining;
+        }
+
+        private void ConvertToDecimal(string value)
+        {
+            decimal tempBalance;
+            if (decimal.TryParse(value, out tempBalance))
+            {
+                CategoryAmount = tempBalance;
             }
             else
             {
-                foreach (Transaction? transaction in transactions)
-                {
-                    totalAllocated += transaction.ExpenseAmount;
-                }
-                Allocated = totalAllocated;
-
-                /* Next set Remaining */
-                decimal totalRemaining = _categoryAmount - _allocated;
-                if (totalRemaining <= 0)
-                {
-                    totalRemaining = 0.00m;
-                }
-                Remaining = totalRemaining;
+                Debug.WriteLine("Error: You must provide a decimal value.");
             }
         }
-
     }
 }

@@ -1,11 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace ModelsLibrary
 {
     public class BudgetCategory
     {
-        public Guid BudgetCategoryID { get; set; }
+        public int BudgetCategoryID { get; set; }
 
         [Required]
         public string? CategoryName { get; set; }
@@ -14,9 +19,9 @@ namespace ModelsLibrary
         public decimal CategoryAmount { get; set; }
 
         [Required]
-        public Guid BudgetCategoryGroupID { get; set; }
+        public int BudgetCategoryGroupID { get; set; }
 
         [Required]
-        public virtual BudgetCategoryGroup? BudgetCategoryGroup { get; set; }
+        public BudgetCategoryGroup? BudgetCategoryGroup { get; set; }
     }
 }

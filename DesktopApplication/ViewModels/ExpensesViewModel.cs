@@ -5,12 +5,11 @@ using CommunityToolkit.Mvvm.Input;
 using DesktopApplication.Contracts.Data;
 using DesktopApplication.Contracts.Services;
 using DesktopApplication.CustomEventArgs;
+using DesktopApplication.Helpers;
 using DesktopApplication.Models;
 using DesktopApplication.ViewModels.Forms;
 using DesktopApplication.Views.Forms;
 using ModelsLibrary;
-using ModelsLibrary.Utilities;
-using Windows.Security.Authentication.OnlineId;
 
 namespace DesktopApplication.ViewModels;
 
@@ -19,14 +18,12 @@ public class ExpensesViewModel : ObservableRecipient
     private readonly ISessionService _sessionService;
     private readonly IDialogService _dialogService;
     private readonly IDataStore _dataStore;
-    private readonly IAPIService _apiService;
 
     public ExpensesViewModel()
     {
         _sessionService = App.GetService<ISessionService>();
         _dialogService = App.GetService<IDialogService>();
         _dataStore = App.GetService<IDataStore>();
-        _apiService = App.GetService<IAPIService>();
 
         ShowAddDialogCommand = new AsyncRelayCommand(ShowAddDialog);
         ShowEditDialogCommand = new AsyncRelayCommand(ShowEditDialog);
@@ -80,7 +77,7 @@ public class ExpensesViewModel : ObservableRecipient
     {
         if (BankAccounts.Any()) return;
         
-        Guid userId = _sessionService.GetSessionUserId();
+        int userId = _sessionService.GetSessionUserId();
 
         IEnumerable<BankAccount?> bankAccounts = await _dataStore.BankAccount.ListAsync(a => a.UserId == _sessionService.GetSessionUserId());
         if (bankAccounts is not null)
@@ -155,38 +152,6 @@ public class ExpensesViewModel : ObservableRecipient
         if (result > 0)
             Transactions.Add(new ObservableTransaction(newTransaction));
 
-        User? user = _dataStore.User!.Get(u => u.UserId == _sessionService.GetSessionUserId(), false, "Budgets");
-        if(user?.Budgets.Count() > 1) {
-
-            //Find out if there is a household transaction related and update it as well
-            var catItemName = newTransaction.BudgetCategory.CategoryName;
-
-            Budget? householdBudget = _dataStore.Budget.GetHouseholdBudget(_sessionService.GetSessionUserId());
-            if (householdBudget is not null)
-            {
-                BudgetCategoryGroup? hhCategoryGroup = householdBudget.BudgetCategoryGroups.FirstOrDefault(g => g.CategoryGroupDesc == "Household");
-                IEnumerable<BudgetCategory> hhCategoryItems = _dataStore.BudgetCategory.GetAll(c => c.BudgetCategoryGroupID == hhCategoryGroup.BudgetCategoryGroupID);
-
-                BudgetCategory item = hhCategoryItems.FirstOrDefault(i => i.CategoryName == catItemName);
-
-                if (item is not null)
-                {
-                    Transaction newHHTransaction = new Transaction();
-                    newHHTransaction.TransactionDate = newTransaction.TransactionDate;
-                    newHHTransaction.TransactionPayee = newTransaction.TransactionPayee;
-                    newHHTransaction.TransactionMemo= newTransaction.TransactionMemo;
-                    newHHTransaction.ExpenseAmount= newTransaction.ExpenseAmount;
-                    newHHTransaction.DepositAmount = newTransaction.DepositAmount;
-                    newHHTransaction.IsTransactionPaid = newTransaction.IsTransactionPaid;
-                    newHHTransaction.IsHousehold = true;
-                    newHHTransaction.BankAccountId = newTransaction.BankAccountId;
-                    newHHTransaction.BankAccount = newTransaction.BankAccount;
-                    newHHTransaction.BudgetCategoryId = item.BudgetCategoryID;
-                    newHHTransaction.BudgetCategory = item;
-                    await _dataStore.Transaction.AddAsync(newHHTransaction);
-                }
-            }
-        }
     }
 
     private async void EditTransactionAsync(object? sender, DialogServiceEventArgs e)
@@ -207,9 +172,6 @@ public class ExpensesViewModel : ObservableRecipient
             Transactions[index].Transaction = existingTransaction;
             BankAccountName = existingTransaction.BankAccount.BankName;
             BankAccountBalance = existingTransaction.BankAccount.Balance.ToString("C2");
-
-            if (Transactions.Count == 0)
-                await _apiService.DeleteAsync($"transactions/{existingTransaction.TransactionId}");
         }
     }
 
@@ -232,7 +194,7 @@ public class ExpensesViewModel : ObservableRecipient
     //Used to filter the transaction list
     public void FilterList(string filter, string category)
     {
-        Guid userId = _sessionService.GetSessionUserId();
+        int userId = _sessionService.GetSessionUserId();
 
         ObservableCollection<ObservableTransaction> filteredList = new ObservableCollection<ObservableTransaction>();
 

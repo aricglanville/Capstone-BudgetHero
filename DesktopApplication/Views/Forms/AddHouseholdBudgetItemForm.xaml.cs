@@ -60,7 +60,6 @@ namespace DesktopApplication.Views.Forms
 
             if (listView != null && listView.SelectedItems.Count > 0)
             {
-                ViewModel.SelectedUsers.Clear();
                 foreach ( var user in listView.SelectedItems )
                 {
                     ViewModel.SelectedUsers.Add((User)user);
@@ -130,6 +129,7 @@ namespace DesktopApplication.Views.Forms
 
         public bool IsValidForm() => isValidItemName && isValidItemAmount && isValidSelectedUsers;
 
+        //TODO: Finish this method
         public void SetModel(object model)
         {
             throw new NotImplementedException();

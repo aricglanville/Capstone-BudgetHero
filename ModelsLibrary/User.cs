@@ -1,11 +1,10 @@
-﻿using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace ModelsLibrary
 {
     public class User
     {
-        public Guid UserId { get; set; }
+        public int UserId { get; set; }
 
         [Required]
         public string? FirstName { get; set; }
@@ -26,6 +25,6 @@ namespace ModelsLibrary
 
         public string? UserImageLink { get; set; }
 
-        public virtual ICollection<Budget>? Budgets { get; set; } 
+        public ICollection<Budget>? Budgets { get; set; } 
     }
 }

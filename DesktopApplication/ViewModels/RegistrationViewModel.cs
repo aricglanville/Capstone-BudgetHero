@@ -1,13 +1,14 @@
 ﻿using System.Globalization;
+using System.Net.Mail;
 using System.Text.RegularExpressions;
+using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using DebugTools;
 using DesktopApplication.Contracts.Data;
 using DesktopApplication.Contracts.Services;
+using DesktopApplication.Data;
 using ModelsLibrary;
-using ModelsLibrary.Utilities;
 
 namespace DesktopApplication.ViewModels;
 
@@ -17,11 +18,6 @@ public class RegistrationViewModel : ObservableRecipient
     private readonly IDataStore _dataStore;
     private readonly IPasswordService _passwordService;
     private readonly ISessionService _sessionService;
-    private readonly IAPIService _apiService;
-
-    private bool isAvailableUsername;
-    private bool isValidEmail;
-    private bool hasMatchingPasswords;
 
     public RegistrationViewModel()
     {
@@ -29,7 +25,6 @@ public class RegistrationViewModel : ObservableRecipient
         _dataStore = App.GetService<IDataStore>();
         _passwordService = App.GetService<IPasswordService>();
         _sessionService = App.GetService<ISessionService>();
-        _apiService = App.GetService<IAPIService>();
         SignUpCommand = new AsyncRelayCommand(AddUser);
         CancelSignupCommand = new RelayCommand(NavigateBack);
         IsFormComplete = false;
@@ -113,55 +108,47 @@ public class RegistrationViewModel : ObservableRecipient
         }
     }
     public bool IsFormComplete { get; set; }
-
+    private bool dataValid = false;
+    
     public async Task AddUser()
     {
         if (IsFormComplete)
         {
-            User? existingUser = null;
-            IEnumerable<User>? _usersFromApi = await _apiService.GetAsync<IEnumerable<User>>("users");
-
-            if (_usersFromApi is not null && _usersFromApi.Any())
-            {
-                existingUser = _usersFromApi.FirstOrDefault(u => u.Username == _username);
-
-                if (existingUser is null)
-                    existingUser = await _dataStore.User.GetAsync(u => u.Username == _username);
-            }       
-
+            var existingUser = await _dataStore.User.GetAsync(u => u.Username == _username);
             if (existingUser is null) {
                 OnUsernameNotTaken?.Invoke(this, EventArgs.Empty);
-                isAvailableUsername = true;
-            } else {
+                dataValid = true;
+            } 
+            else {
                 OnUsernameTaken?.Invoke(this, EventArgs.Empty);
-                isAvailableUsername = false;
+                dataValid = false;
             }
 
             if (IsValidEmail(_email))
             {
                 OnValidEmail?.Invoke(this, EventArgs.Empty);
-                isValidEmail = true;
+                dataValid = true;
             }
             else
             {
                 OnInvalidEmail?.Invoke(existingUser, EventArgs.Empty);
-                isValidEmail = false;
+                dataValid = false;
             }
 
 
             if(_password == _confirmPassword)
             {
                 OnMatchingPasswords?.Invoke(this, EventArgs.Empty);
-                hasMatchingPasswords = true;
+                dataValid = true;
             }
             else
             {
                 OnMismatchingPasswords?.Invoke(this, EventArgs.Empty);
-                hasMatchingPasswords = false;
+                dataValid = false;
             }
 
 
-            if (IsValidRegistration())
+            if (dataValid)
             {
                 await Task.Delay(1500);
                 string hashedPassword = _passwordService.HashPassword(_password!);
@@ -175,14 +162,12 @@ public class RegistrationViewModel : ObservableRecipient
                     Password = hashedPassword
                 };
 
-                int result = await _dataStore.User.AddAsync(newUser);
+                var result = await _dataStore.User.AddAsync(newUser);
 
                 if (result == 1)
                 {
-                    await _apiService.PostAsync("users", newUser);
-                    Jsonizer.GimmeDatJson(newUser);
                     _sessionService.CreateSession(newUser);
-                    await CreateNewUserBudget();
+                    CreateNewUserBudget();
                     _navigationService.NavigateTo(typeof(AccountsViewModel).FullName!);
                 }
             }
@@ -252,9 +237,9 @@ public class RegistrationViewModel : ObservableRecipient
         }
     }
 
-    private async Task CreateNewUserBudget()
+    private void CreateNewUserBudget()
     {
-        Guid userId = _sessionService.GetSessionUserId();
+        int userId = _sessionService.GetSessionUserId();
         User? user = _dataStore.User.Get(u => u.UserId == userId, false, "Budgets");
         
         if (user is not null)
@@ -272,39 +257,12 @@ public class RegistrationViewModel : ObservableRecipient
             };
 
             userBudgets.Add(budget);
+
             user.Budgets = userBudgets;
-            await _dataStore.User.Update(user);
-            Jsonizer.GimmeDatJson(user.Budgets.ToList()[0]);
-            await _apiService.PostAsync("budgets", user.Budgets.ToList()[0]);
 
-            //Create a category group to hold deposits
-            BudgetCategoryGroup DepositCatGroup = new BudgetCategoryGroup() { CategoryGroupDesc = "Deposits" };
-            Budget personalBudget = _dataStore.Budget.GetPersonalBudget(userId);
-            personalBudget!.BudgetCategoryGroups!.Add(DepositCatGroup);
-            await _dataStore.BudgetCategoryGroup.AddAsync(DepositCatGroup);
-
-            //Create Category items for user to deposit to
-            BudgetCategoryGroup? depositGroup = personalBudget.BudgetCategoryGroups.FirstOrDefault(g => g.CategoryGroupDesc == "Deposits");
-
-            List<BudgetCategory> newCategories = new List<BudgetCategory>
-            {
-                new BudgetCategory() { CategoryName = "Paychecks", CategoryAmount = 0, BudgetCategoryGroupID = depositGroup.BudgetCategoryGroupID },
-                new BudgetCategory() { CategoryName = "Refunds", CategoryAmount = 0, BudgetCategoryGroupID = depositGroup.BudgetCategoryGroupID },
-                new BudgetCategory() { CategoryName = "Cash", CategoryAmount = 0, BudgetCategoryGroupID = depositGroup.BudgetCategoryGroupID }
-            };
-
-            foreach(var category in newCategories)
-            {
-                await _dataStore.BudgetCategory.AddAsync(category);
-            }
-
-            //TODO: Add more API Calls for new code
-
+            _dataStore.User.Update(user);
         }
     }
 
     private void NavigateBack() => _navigationService.GoBack();
-
-    private bool IsValidRegistration()
-        => isAvailableUsername && isValidEmail && hasMatchingPasswords;
 }

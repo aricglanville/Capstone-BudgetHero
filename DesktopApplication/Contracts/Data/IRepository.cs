@@ -3,7 +3,7 @@
 namespace DesktopApplication.Contracts.Data;
 public interface IRepository<T> where T : class
 {
-    T? GetById(Guid id);
+    T? GetById(int id);
 
     T? Get(Expression<Func<T, bool>> predicate, bool asNotTracking = false, string? includes = null);
 
@@ -15,11 +15,9 @@ public interface IRepository<T> where T : class
 
     IEnumerable<T> List(Expression<Func<T, bool>> predicate, Expression<Func<T, int>> orderBy = null!, string? includes = null);
 
-    Task<IEnumerable<T>> ListAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, int>> orderBy = null!, string? includes = null);
+    Task<IEnumerable<T?>> ListAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, int>> orderBy = null!, string? includes = null);
 
     Task<int> AddAsync(T entity);
-
-    Task<int> AddAsync(IEnumerable<T> entities);
 
     Task DeleteAsync(T entity);
 

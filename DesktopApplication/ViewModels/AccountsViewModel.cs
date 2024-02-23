@@ -4,11 +4,11 @@ using CommunityToolkit.Mvvm.Input;
 using DesktopApplication.Contracts.Data;
 using DesktopApplication.Contracts.Services;
 using DesktopApplication.CustomEventArgs;
+using DesktopApplication.Helpers;
 using DesktopApplication.Models;
 using DesktopApplication.ViewModels.Forms;
 using DesktopApplication.Views.Forms;
 using ModelsLibrary;
-using ModelsLibrary.Utilities;
 
 namespace DesktopApplication.ViewModels;
 
@@ -17,22 +17,17 @@ public class AccountsViewModel : ObservableRecipient
     private readonly ISessionService _sessionService;
     private readonly IDialogService _dialogService;
     private readonly IDataStore _dataStore;
-    private readonly IAPIService _apiService;
-    private readonly Guid _userId;
 
     public AccountsViewModel()
     {
         _sessionService = App.GetService<ISessionService>();
         _dialogService = App.GetService<IDialogService>();
         _dataStore = App.GetService<IDataStore>();
-        _apiService = App.GetService<IAPIService>();
 
         ShowAddDialogCommand = new AsyncRelayCommand(ShowAddDialog);
         ShowEditDialogCommand = new AsyncRelayCommand(ShowEditDialog);
         ShowDeleteDialogCommand = new AsyncRelayCommand(ShowDeleteDialog);
         ShowTransferDialogCommand = new AsyncRelayCommand(ShowTransferDialog);
-
-        _userId = _sessionService.GetSessionUserId();
     }
 
     public IAsyncRelayCommand ShowAddDialogCommand { get; }
@@ -75,55 +70,18 @@ public class AccountsViewModel : ObservableRecipient
     {
         if (BankAccounts.Any()) return;
 
-        IEnumerable<BankAccount> _databaseAccounts;
-        IEnumerable<Transaction> _databaseTransactions;
-        IEnumerable<BudgetCategory> _databaseCategories;
-        IEnumerable<Transaction> _apiTransactions;
-        IEnumerable<BankAccount> _apiAccounts;
-        IEnumerable<BudgetCategory> _apiCategories;
-        Budget personalBudget = _dataStore.Budget.GetPersonalBudget(_userId);
-        
-        _databaseAccounts = await _dataStore.BankAccount.ListAsync(a => a.UserId == _userId);
-        _databaseCategories = await _dataStore.Budget.GetBudgetCategories(personalBudget);
-        _apiTransactions = await _apiService.GetTransactions(_userId);
-        _apiAccounts = await _apiService.GetUserAccounts(_userId);
-        _apiCategories = await _apiService.GetCategories(personalBudget);
-
-        if (_databaseAccounts.Any())
+        IEnumerable<BankAccount?> bankAccounts = await _dataStore.BankAccount.ListAsync(a => a.UserId == _sessionService.GetSessionUserId());
+        if (bankAccounts is not null)
         {
-            _databaseAccounts.ToList().ForEach(a => BankAccounts.Add(new ObservableBankAccount(a)));
-
-            await _apiService.UpdateAccounts(_apiAccounts, _databaseAccounts);
-
-            _databaseTransactions = await _dataStore.Transaction
-            .ListAsync(t => t.BankAccount!.UserId == _userId, null!, "BankAccount");
-
-            if (_databaseCategories.Any())
-                await _apiService.UpdateCategories(_apiCategories, _databaseCategories);
-
-            if (_databaseTransactions.Any())
+            foreach (var bankAccount in bankAccounts)
             {
-                await _apiService.UpdateTransactions(_apiTransactions, _databaseTransactions);
-                allTransactions = _databaseTransactions.ToList();
-            }
-        } 
-        else if (_apiAccounts.Any())
-        {
-            await _dataStore.BankAccount.SaveWithForeignKeysAsync(_apiAccounts);
-
-            _apiAccounts.ToList().ForEach(a => BankAccounts.Add(new ObservableBankAccount(a)));
-
-            if (_apiCategories.Any())
-                await _dataStore.Budget.SaveWithForeignKeysAsync(_apiCategories, personalBudget);
-
-            if (_apiTransactions.Any())
-            {
-                await _dataStore.Transaction.SaveWithForeignKeysAsync(_apiTransactions);
-
-                allTransactions = _apiTransactions.ToList();
+                BankAccounts.Add(new ObservableBankAccount(bankAccount!));
             }
         }
+
         VerifyUserAccountCount();
+
+        allTransactions = _dataStore.Transaction.GetAll(t => t.BankAccount.UserId == _sessionService.GetSessionUserId());
     }
 
     private async Task ShowAddDialog()
@@ -208,9 +166,6 @@ public class AccountsViewModel : ObservableRecipient
 
         BankAccounts.Remove(_selectedBankAccount);
 
-        if (BankAccounts.Count == 0)
-            await _apiService.DeleteAsync($"bankaccounts/{selectedBankAccount.BankAccountId}");
-
         VerifyUserAccountCount();
     }
 
@@ -241,9 +196,9 @@ public class AccountsViewModel : ObservableRecipient
         return accountForm.ViewModel.BankAccount;
     }
 
-    private ObservableBankAccount GetBankAccount(Guid bankAccountId)
+    private ObservableBankAccount GetBankAccount(int bankAccountId)
     {
-        ObservableBankAccount? observableAccount = BankAccounts.FirstOrDefault(a => a.BankAccount.BankAccountId == bankAccountId, null);
+        ObservableBankAccount? observableAccount = BankAccounts.FirstOrDefault(a => a?.BankAccount.BankAccountId == bankAccountId, null);
 
         if (observableAccount is not null)
             return observableAccount;
@@ -272,7 +227,7 @@ public class AccountsViewModel : ObservableRecipient
             throw new Exception("Somehow a non-decimal value made it this far...");
     }
 
-    private void FilterAccountTransactions(Guid accountId)
+    private void FilterAccountTransactions(int accountId)
     {
         if (allTransactions is not null)
         {
@@ -285,7 +240,7 @@ public class AccountsViewModel : ObservableRecipient
 
     private void VerifyUserAccountCount()
     {
-        if (BankAccounts.Count > 1)
+        if (BankAccounts.Count() > 1)
             HasMultipleAccounts = true;
         else
             HasMultipleAccounts = false;

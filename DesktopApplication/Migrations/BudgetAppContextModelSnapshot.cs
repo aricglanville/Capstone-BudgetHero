@@ -19,39 +19,39 @@ namespace DesktopApplication.Migrations
 
             modelBuilder.Entity("BudgetBudgetCategoryGroup", b =>
                 {
-                    b.Property<Guid>("BudgetCategoryGroupsBudgetCategoryGroupID")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("BudgetCategoryGroupsBudgetCategoryGroupID")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("BudgetsBudgetId")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("BudgetsBudgetId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("BudgetCategoryGroupsBudgetCategoryGroupID", "BudgetsBudgetId");
 
                     b.HasIndex("BudgetsBudgetId");
 
-                    b.ToTable("BudgetBudgetCategoryGroup");
+                    b.ToTable("BudgetBudgetCategoryGroup", (string)null);
                 });
 
             modelBuilder.Entity("BudgetUser", b =>
                 {
-                    b.Property<Guid>("BudgetsBudgetId")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("BudgetsBudgetId")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("UsersUserId")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("UsersUserId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("BudgetsBudgetId", "UsersUserId");
 
                     b.HasIndex("UsersUserId");
 
-                    b.ToTable("BudgetUser");
+                    b.ToTable("BudgetUser", (string)null);
                 });
 
             modelBuilder.Entity("ModelsLibrary.BankAccount", b =>
                 {
-                    b.Property<Guid>("BankAccountId")
+                    b.Property<int>("BankAccountId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("AccountType")
                         .IsRequired()
@@ -65,21 +65,21 @@ namespace DesktopApplication.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("BankAccountId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("BankAccounts");
+                    b.ToTable("BankAccounts", (string)null);
                 });
 
             modelBuilder.Entity("ModelsLibrary.Budget", b =>
                 {
-                    b.Property<Guid>("BudgetId")
+                    b.Property<int>("BudgetId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("BudgetName")
                         .IsRequired()
@@ -91,17 +91,17 @@ namespace DesktopApplication.Migrations
 
                     b.HasKey("BudgetId");
 
-                    b.ToTable("Budgets");
+                    b.ToTable("Budgets", (string)null);
                 });
 
             modelBuilder.Entity("ModelsLibrary.BudgetCategory", b =>
                 {
-                    b.Property<Guid>("BudgetCategoryID")
+                    b.Property<int>("BudgetCategoryID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("BudgetCategoryGroupID")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("BudgetCategoryGroupID")
+                        .HasColumnType("INTEGER");
 
                     b.Property<decimal>("CategoryAmount")
                         .ValueGeneratedOnAdd()
@@ -117,14 +117,14 @@ namespace DesktopApplication.Migrations
 
                     b.HasIndex("BudgetCategoryGroupID");
 
-                    b.ToTable("BudgetCategories");
+                    b.ToTable("BudgetCategories", (string)null);
                 });
 
             modelBuilder.Entity("ModelsLibrary.BudgetCategoryGroup", b =>
                 {
-                    b.Property<Guid>("BudgetCategoryGroupID")
+                    b.Property<int>("BudgetCategoryGroupID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("CategoryGroupDesc")
                         .IsRequired()
@@ -132,20 +132,20 @@ namespace DesktopApplication.Migrations
 
                     b.HasKey("BudgetCategoryGroupID");
 
-                    b.ToTable("BudgetCategoryGroups");
+                    b.ToTable("BudgetCategoryGroups", (string)null);
                 });
 
             modelBuilder.Entity("ModelsLibrary.Transaction", b =>
                 {
-                    b.Property<Guid>("TransactionId")
+                    b.Property<int>("TransactionId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("BankAccountId")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("BankAccountId")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("BudgetCategoryId")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("BudgetCategoryId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<decimal>("DepositAmount")
                         .HasPrecision(18, 2)
@@ -160,7 +160,8 @@ namespace DesktopApplication.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(false);
 
-                    b.Property<bool>("IsTransactionPaid")
+                    b.Property<bool?>("IsTransactionPaid")
+                        .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(true);
@@ -181,14 +182,14 @@ namespace DesktopApplication.Migrations
 
                     b.HasIndex("BudgetCategoryId");
 
-                    b.ToTable("Transactions");
+                    b.ToTable("Transactions", (string)null);
                 });
 
             modelBuilder.Entity("ModelsLibrary.User", b =>
                 {
-                    b.Property<Guid>("UserId")
+                    b.Property<int>("UserId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("EmailAddress")
                         .IsRequired()
@@ -218,7 +219,7 @@ namespace DesktopApplication.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("BudgetBudgetCategoryGroup", b =>

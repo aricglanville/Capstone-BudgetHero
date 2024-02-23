@@ -1,10 +1,14 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.WinUI.UI.Controls.TextToolbarFormats;
 using DesktopApplication.Contracts.Data;
 using DesktopApplication.Contracts.Services;
 using DesktopApplication.Helpers;
 using DesktopApplication.Models;
+using DesktopApplication.Services;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using ModelsLibrary;
-using System.Collections.ObjectModel;
 
 namespace DesktopApplication.ViewModels.Forms;
 public class TransactionFormViewModel : ObservableRecipient
@@ -140,22 +144,24 @@ public class TransactionFormViewModel : ObservableRecipient
 
     private void SetSelectedBankAccount()
     {
+        int bankAccountId = 0;
+
         if (ObservableTransaction is not null)
             if (ObservableTransaction.Transaction is not null)
-            {
-                Guid bankAccountId = ObservableTransaction.Transaction.BankAccountId;
-                SelectedBankAccount = BankAccounts.FirstOrDefault(b => b.BankAccountId == bankAccountId);
-            }
+                bankAccountId = ObservableTransaction.Transaction.BankAccountId;
+
+        SelectedBankAccount = BankAccounts.FirstOrDefault(b => b.BankAccountId == bankAccountId);
     }
 
     private void SetSelectedCategory()
     {
+        int categoryId = 0;
+
         if (ObservableTransaction is not null)
             if (ObservableTransaction.Transaction is not null)
-            {
-                Guid categoryId = ObservableTransaction.Transaction.BudgetCategoryId;
-                SelectedCategory = BudgetCategories.FirstOrDefault(c => c.BudgetCategoryID == categoryId);
-            }
+                categoryId = ObservableTransaction.Transaction.BudgetCategoryId;
+
+        SelectedCategory = BudgetCategories.FirstOrDefault(c => c.BudgetCategoryID == categoryId);
     }
 
     private void SetTransactionType()

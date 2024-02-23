@@ -1,17 +1,22 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace ModelsLibrary
 {
     public class Transaction
     {
-        public Guid TransactionId { get; set; }
+        public int TransactionId { get; set; }
 
         [Required]
         public DateTime TransactionDate { get; set; }
 
         [Required]
-        public string? TransactionPayee { get; set; }
+        public string TransactionPayee { get; set; } = null!;
 
         public string? TransactionMemo { get; set; }
 
@@ -22,22 +27,22 @@ namespace ModelsLibrary
         public decimal DepositAmount { get; set; }
 
         [Required]
-        public bool IsTransactionPaid { get; set; }
+        public bool? IsTransactionPaid { get; set; }
 
         [Required]
         public bool IsHousehold { get; set; }
 
         [Required]
-        public Guid BankAccountId { get; set; }
+        public int BankAccountId { get; set; }
 
         [Required]
-        public virtual BankAccount? BankAccount { get; set; }
+        public BankAccount BankAccount { get; set; } = null!;
 
         [Required]
-        public Guid BudgetCategoryId { get; set; }
+        public int BudgetCategoryId { get; set; }
 
         [Required]
-        public virtual BudgetCategory? BudgetCategory { get; set; }
+        public BudgetCategory BudgetCategory { get; set; } = null!;
     }
 }
  

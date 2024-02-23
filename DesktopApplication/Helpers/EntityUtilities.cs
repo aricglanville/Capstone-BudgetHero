@@ -1,21 +1,21 @@
-﻿using Microsoft.EntityFrameworkCore.Update.Internal;
-using ModelsLibrary;
+﻿using ModelsLibrary;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModelsLibrary.Utilities
+namespace DesktopApplication.Helpers
 {
     public class EntityUtilities
     {
         public static BankAccount Update(BankAccount existing, BankAccount modified)
         {
+            existing.BankAccountId = modified.BankAccountId;
             existing.BankName = modified.BankName;
             existing.AccountType = modified.AccountType;
             existing.Balance = modified.Balance;
-            existing.UserId = modified.UserId;
+            existing.UserId= modified.UserId;
             existing.User = modified.User;
 
             return existing;
@@ -36,23 +36,6 @@ namespace ModelsLibrary.Utilities
             existing.BudgetCategory = modified.BudgetCategory;
 
             return existing;
-        }
-
-        public static void Update(ref User existing, User modified)
-        {
-            existing.FirstName = modified.FirstName;
-            existing.LastName = modified.LastName;
-            existing.EmailAddress = modified.EmailAddress;
-            existing.PercentageMod = modified.PercentageMod;
-            existing.Username = modified.Username;
-            existing.Password = modified.Password;
-            existing.UserImageLink = modified.UserImageLink;
-        }
-
-        public static void Update(Budget existing, Budget modified)
-        {
-            existing.BudgetName = modified.BudgetName;
-            existing.BudgetType = modified.BudgetType;
         }
 
         public static BankAccount Duplicate(BankAccount selectedBankAccount)

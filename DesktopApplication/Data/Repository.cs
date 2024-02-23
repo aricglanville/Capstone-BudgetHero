@@ -6,14 +6,14 @@ using Microsoft.EntityFrameworkCore;
 namespace DesktopApplication.Data;
 public class Repository<T> : IRepository<T> where T : class
 {
-    protected BudgetAppContext _context;
+    private readonly BudgetAppContext dbContext;
 
     internal DbSet<T> dbset;
     public Repository(BudgetAppContext context)
     {
-        _context = context;
+        dbContext = context;
 
-        dbset = _context.Set<T>();
+        dbset = dbContext.Set<T>();
     }
 
     public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
@@ -35,26 +35,20 @@ public class Repository<T> : IRepository<T> where T : class
 
     public async virtual Task<int> AddAsync(T entity)
     {
-        _context.Set<T>().Add(entity);
-        return await _context.SaveChangesAsync();
-    }
-
-    public async virtual Task<int> AddAsync(IEnumerable<T> entities)
-    {
-        _context.Set<T>().AddRange(entities);
-        return await _context.SaveChangesAsync();
+        dbContext.Set<T>().Add(entity);
+        return await dbContext.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(T entity)
     {
-        _context.Set<T>().Remove(entity);
-        await _context.SaveChangesAsync();
+        dbContext.Set<T>().Remove(entity);
+        await dbContext.SaveChangesAsync();
     }
 
     public void Delete(IEnumerable<T> entities)
     {
-        _context.Set<T>().RemoveRange(entities);
-        _context.SaveChanges();
+        dbContext.Set<T>().RemoveRange(entities);
+        dbContext.SaveChanges();
     }
 
     public virtual T? Get(Expression<Func<T, bool>> predicate, bool asNotTracking = false, string? includes = null)
@@ -63,21 +57,21 @@ public class Repository<T> : IRepository<T> where T : class
         {
             if (asNotTracking)
             {
-                return _context.Set<T>()
+                return dbContext.Set<T>()
                                  .AsNoTracking()
                                  .Where(predicate)
                                  .FirstOrDefault();
             }
             else
             {
-                return _context.Set<T>()
+                return dbContext.Set<T>()
                     .Where(predicate)
                     .FirstOrDefault();
             }
         }
         else
         {
-            IQueryable<T> queryable = _context.Set<T>();
+            IQueryable<T> queryable = dbContext.Set<T>();
             foreach (var includeProperty in includes.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 queryable = queryable.Include(includeProperty);
@@ -105,21 +99,21 @@ public class Repository<T> : IRepository<T> where T : class
         {
             if (asNotTracking)
             {
-                return await _context.Set<T>()
+                return await dbContext.Set<T>()
                     .AsNoTracking()
                     .Where(predicate)
                     .FirstOrDefaultAsync();
             }
             else
             {
-                return await _context.Set<T>()
+                return await dbContext.Set<T>()
                     .Where(predicate)
                     .FirstOrDefaultAsync();
             }
         }
         else
         {
-            IQueryable<T> queryable = _context.Set<T>();
+            IQueryable<T> queryable = dbContext.Set<T>();
             foreach (var includeProperty in includes.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 queryable = queryable.Include(includeProperty);
@@ -141,22 +135,22 @@ public class Repository<T> : IRepository<T> where T : class
         }
     }
 
-    public virtual T? GetById(Guid id)
+    public virtual T? GetById(int id)
     {
-        return _context.Set<T>().Find(id);
+        return dbContext.Set<T>().Find(id);
     }
 
     public virtual IEnumerable<T> List()
     {
-        return _context.Set<T>().ToList().AsEnumerable();
+        return dbContext.Set<T>().ToList().AsEnumerable();
     }
 
     public virtual IEnumerable<T> List(Expression<Func<T, bool>> predicate, Expression<Func<T, int>>? orderBy = null, string? includes = null)
     {
-        IQueryable<T> queryable = _context.Set<T>();
+        IQueryable<T> queryable = dbContext.Set<T>();
         if (predicate != null && includes == null)
         {
-            return _context.Set<T>()
+            return dbContext.Set<T>()
                 .Where(predicate)
                 .AsEnumerable();
         }
@@ -195,12 +189,12 @@ public class Repository<T> : IRepository<T> where T : class
         }
     }
 
-    public async virtual Task<IEnumerable<T>> ListAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, int>>? orderBy = null, string? includes = null)
+    public async virtual Task<IEnumerable<T?>> ListAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, int>>? orderBy = null, string? includes = null)
     {
-        IQueryable<T> queryable = _context.Set<T>();
+        IQueryable<T> queryable = dbContext.Set<T>();
         if (predicate != null && includes == null)
         {
-            return _context.Set<T>()
+            return dbContext.Set<T>()
                 .Where(predicate)
                 .AsEnumerable();
         }
@@ -241,7 +235,7 @@ public class Repository<T> : IRepository<T> where T : class
 
     public async Task Update(T entity)
     {
-        _context.Entry(entity).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
+        dbContext.Entry(entity).State = EntityState.Modified;
+        await dbContext.SaveChangesAsync();
     }
 }

@@ -55,7 +55,7 @@ namespace DesktopApplication.ViewModels.Forms
         {
             if (BankAccounts.Any()) { return; }
 
-            Guid userId = _sessionService.GetSessionUserId();
+            int userId = _sessionService.GetSessionUserId();
             IEnumerable<BankAccount?> _userAccounts = await _dataStore.BankAccount.ListAsync(a => a.UserId == userId);
 
             if (_userAccounts is not null)

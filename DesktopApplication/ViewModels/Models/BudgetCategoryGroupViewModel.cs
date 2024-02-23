@@ -31,6 +31,7 @@ public class BudgetCategoryGroupViewModel
                 {
                     CategoryName = "Item 1",
                     CategoryAmount = 100.00M,
+                    BudgetCategoryGroupID = 1,
                     BudgetCategoryGroup = _budgetCategoryGroup
                 }
             ),
@@ -39,6 +40,7 @@ public class BudgetCategoryGroupViewModel
                 {
                     CategoryName = "Item 2",
                     CategoryAmount = 200.00M,
+                    BudgetCategoryGroupID = 2,
                     BudgetCategoryGroup = _budgetCategoryGroup
                 }
             ),
@@ -47,6 +49,7 @@ public class BudgetCategoryGroupViewModel
                 {
                     CategoryName = "Item 3",
                     CategoryAmount = 300.00M,
+                    BudgetCategoryGroupID = 3,
                     BudgetCategoryGroup = _budgetCategoryGroup
                 }
             ),

@@ -1,4 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using ModelsLibrary;
 
 namespace DesktopApplication.Data;
@@ -17,7 +22,7 @@ public class BudgetAppContext : DbContext
     {
         var folder = Environment.SpecialFolder.LocalApplicationData;
         var path = Environment.GetFolderPath(folder);
-        DbPath = System.IO.Path.Join(path, "BudgetHeroProduction.db");
+        DbPath = System.IO.Path.Join(path, "BudgetHeroApp.db");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)

@@ -7,7 +7,6 @@ using DesktopApplication.Views;
 
 using Microsoft.UI.Xaml.Navigation;
 using ModelsLibrary;
-using System.Diagnostics;
 using System.Windows.Input;
 
 namespace DesktopApplication.ViewModels;
@@ -63,16 +62,6 @@ public class ShellViewModel : ObservableRecipient
     }
 
     public ICommand LogoutCommand { get; }
-
-    public async void LoadAsync()
-    {
-        Debug.WriteLine("Loading data from API...");
-        //IEnumerable<User>? _users = await APIService.GetAsync<IEnumerable<User>>("users");
-
-        //if (_users is not null)
-
-        Debug.WriteLine("API data has been loaded!");
-    }
 
     private void ActivateSession(object? sender, EventArgs e)
     {

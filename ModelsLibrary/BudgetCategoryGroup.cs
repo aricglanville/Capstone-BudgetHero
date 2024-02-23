@@ -1,15 +1,20 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace ModelsLibrary
 {
     public class BudgetCategoryGroup
     {
-        public Guid BudgetCategoryGroupID { get; set; }
+        public int BudgetCategoryGroupID { get; set; }
 
         [Required]
-        public string? CategoryGroupDesc { get; set; }
+        public string CategoryGroupDesc { get; set; } = null!;
 
         [Required]
-        public virtual ICollection<Budget>? Budgets { get; set; }
+        public ICollection<Budget>? Budgets { get; set; }
     }
 }

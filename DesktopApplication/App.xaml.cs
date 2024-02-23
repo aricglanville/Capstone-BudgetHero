@@ -76,7 +76,6 @@ public partial class App : Application
             services.AddTransient<IDialogService, DialogService>();
             services.AddTransient<IPasswordService, PasswordService>();
             services.AddSingleton<IDataStore, DataStore>();
-            services.AddScoped<IAPIService, APIService>();
 
             // Core Services
             services.AddSingleton<IFileService, FileService>();
